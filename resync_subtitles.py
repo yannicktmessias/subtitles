@@ -1,7 +1,22 @@
 #!/usr/bin/env python3
 
-def delay_time(time, delay):
+from pathlib import Path
+import chardet
 
+def detect_encoding(file_name):
+    """Detect the file encoding and returns it."""
+    file_path = Path(file_name)
+
+    # We must read as binary (bytes) because we don't yet know encoding
+    blob = file_path.read_bytes()
+
+    detection = chardet.detect(blob)
+    encoding = detection["encoding"]
+
+    return encoding
+
+def delay_time(time, delay):
+    """Add delay to timecode in 'hours:minutes:seconds,milliseconds' format."""
     hour, minute, second = time.split(':')
 
     hours = float(hour)
@@ -29,9 +44,11 @@ def main():
     delay = float(input("Delay (s): \n").replace(',', '.'))
     output_file_name = input("Output file name: \n")
 
+    detected_encoding = detect_encoding(input_file_name)
+
     output_file_lines = []
 
-    with open(input_file_name, mode='r', encoding='utf-8') as input_file:
+    with open(input_file_name, mode='r', encoding=detected_encoding) as input_file:
         input_file_lines = input_file.readlines()
          
         for line in input_file_lines:
